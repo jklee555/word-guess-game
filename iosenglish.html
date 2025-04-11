@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#007AFF">
+    <title>小学英语猜词游戏</title>
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-gray: #8E8E93;
+            --ios-light-gray: #F2F2F7;
+            --ios-dark-gray: #1C1C1E;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--ios-light-gray);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            color: var(--ios-dark-gray);
+        }
+
+        .container {
+            max-width: 100%;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        h1 {
+            color: var(--ios-dark-gray);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .grade-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .grade-btn {
+            padding: 10px 5px;
+            font-size: 14px;
+        }
+
+        .game-area {
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .word-display {
+            font-size: 20px;
+            margin: 15px 0;
+        }
+
+        .phonetic {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .example {
+            font-size: 14px;
+            margin: 10px 0;
+            padding: 12px;
+        }
+
+        .input-mode-container {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .hint-section {
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hint-letters {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 5px;
+            width: 100%;
+            overflow-x: auto;
+            padding: 5px 0;
+        }
+
+        .hint-letter {
+            min-width: 30px;
+            width: 30px;
+            height: 40px;
+            border: 2px solid var(--ios-gray);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 500;
+            background: var(--ios-light-gray);
+            flex-shrink: 0;
+        }
+
+        .hint-letter.revealed {
+            border-color: var(--ios-blue);
+            color: var(--ios-blue);
+            background: white;
+        }
+
+        .hint-letters-container {
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+        }
+
+        .input-section {
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--ios-gray);
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            background: var(--ios-light-gray);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .submit-btn, .show-answer-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn {
+            background: var(--ios-blue);
+            color: white;
+        }
+
+        .show-answer-btn {
+            background: var(--ios-gray);
+            color: white;
+        }
+
+        .answer-display {
+            font-size: 14px;
+            color: var(--ios-blue);
+            font-weight: 500;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .options-container {
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .option-btn {
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .result {
+            margin: 10px 0;
+            font-size: 14px;
+            padding: 8px;
+        }
+
+        .score {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .instructions {
+            margin-top: 15px;
+            padding: 12px;
+        }
+
+        .instructions h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .instructions p {
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .speak-btn {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .speak-btn:hover {
+            background: #0056b3;
+        }
+
+        .speak-btn:active {
+            transform: scale(0.95);
+        }
+
+        .speak-btn i {
+            font-size: 16px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+
+            .grade-btn, .submit-btn, .show-answer-btn, .option-btn {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .word-display {
+                font-size: 20px;
+            }
+
+            .phonetic, .example {
+                font-size: 14px;
+            }
+        }
+
+        /* 暗色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #000000;
+                color: #FFFFFF;
+            }
+
+            .title {
+                color: #FFFFFF;
+            }
+
+            .grade-btn, .input-field {
+                background-color: #1C1C1E;
+                border-color: #38383A;
+                color: #FFFFFF;
+            }
+
+            .game-area {
+                background-color: #1C1C1E;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .word-display, .example {
+                color: #FFFFFF;
+            }
+
+            .phonetic {
+                color: #8E8E93;
+            }
+
+            .submit-btn, .show-answer-btn {
+                background-color: #38383A;
+                color: #FFFFFF;
+            }
+
+            .option-btn {
+                background-color: #1C1C1E;
+                border-color: #38383A;
+                color: #FFFFFF;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>小学英语猜词游戏</h1>
+        
+        <div class="mode-selector">
+            <button class="mode-btn" data-mode="input">输入模式</button>
+            <button class="mode-btn" data-mode="choice">选择题模式</button>
+        </div>
+
+        <div class="grade-selector">
+            <button class="grade-btn" data-grade="1">一年级</button>
+            <button class="grade-btn" data-grade="2">二年级</button>
+            <button class="grade-btn" data-grade="3">三年级</button>
+            <button class="grade-btn" data-grade="4">四年级</button>
+            <button class="grade-btn" data-grade="5">五年级</button>
+            <button class="grade-btn" data-grade="6">六年级</button>
+        </div>
+
+        <div class="game-area">
+            <div class="word-display">
+                <div class="word"></div>
+                <button class="speak-btn">
+                    <i>🔊</i> 发音
+                </button>
+            </div>
+            <div class="phonetic"></div>
+            <div class="example"></div>
+            <div class="input-mode-container">
+                <div class="hint-section">
+                    <div class="hint-letters">
+                        <div class="hint-letters-container"></div>
+                    </div>
+                </div>
+                <div class="input-section">
+                    <input type="text" id="answer-input" placeholder="请输入答案">
+                    <div class="button-group">
+                        <button class="submit-btn">提交</button>
+                        <button class="show-answer-btn">显示答案</button>
+                    </div>
+                    <div class="answer-display"></div>
+                </div>
+            </div>
+            <div class="options-container" style="display: none;">
+                <button class="option-btn" data-option="1"></button>
+                <button class="option-btn" data-option="2"></button>
+                <button class="option-btn" data-option="3"></button>
+                <button class="option-btn" data-option="4"></button>
+            </div>
+            <div class="result"></div>
+            <div class="score">得分: <span id="score">0</span></div>
+        </div>
+
+        <div class="instructions">
+            <h3>游戏说明：</h3>
+            <p>1. 选择年级和游戏模式（输入模式/选择题模式）</p>
+            <p>2. 输入模式：根据中文意思输入英文单词，会显示部分字母提示</p>
+            <p>3. 选择题模式：从四个选项中选择正确的英文单词填空</p>
+            <p>4. 答对一题得10分，答错可以重试</p>
+            <p>5. 每个单词都配有音标和例句，帮助学习</p>
+        </div>
+    </div>
+
+    <script>
+        // 从localStorage加载导入的数据
+        const wordDatabase = JSON.parse(localStorage.getItem('wordDatabase')) || {
+            // 默认题库
+            1: [
+                { word: "apple", meaning: "苹果", phonetic: "/ˈæpl/", example: "I like to eat an apple. 我喜欢吃苹果。" },
+                { word: "book", meaning: "书", phonetic: "/bʊk/", example: "This is my book. 这是我的书。" }
+            ]
+        };
+
+        let currentGrade = null;
+        let currentWord = null;
+        let score = 0;
+        let currentMode = 'input';
+        let revealedLetters = [];
+
+        // 选择游戏模式
+        document.querySelectorAll('.mode-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                currentMode = button.dataset.mode;
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+                
+                if (currentMode === 'choice') {
+                    document.querySelector('.options-container').style.display = 'grid';
+                    document.querySelector('.input-mode-container').style.display = 'none';
+                } else {
+                    document.querySelector('.options-container').style.display = 'none';
+                    document.querySelector('.input-mode-container').style.display = 'flex';
+                }
+                
+                if (currentGrade) {
+                    startNewGame();
+                }
+            });
+        });
+
+        // 选择年级
+        document.querySelectorAll('.grade-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                currentGrade = parseInt(button.dataset.grade);
+                document.querySelectorAll('.grade-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+                startNewGame();
+            });
+        });
+
+        // 开始新游戏
+        function startNewGame() {
+            window.speechSynthesis.cancel(); // 停止所有语音
+            const words = wordDatabase[currentGrade];
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            
+            document.querySelector('.word').textContent = currentWord.meaning;
+            document.querySelector('.phonetic').textContent = currentWord.phonetic;
+            document.querySelector('.answer-display').style.display = 'none';
+            
+            // 在例句中创建空白（两种模式都适用）
+            if (currentWord.example && currentWord.example.includes(currentWord.word)) {
+                const exampleParts = currentWord.example.split(currentWord.word);
+                const blankExample = `${exampleParts[0]}<span class="blank-word">_____</span>${exampleParts[1]}`;
+                document.querySelector('.example').innerHTML = blankExample;
+            } else {
+                document.querySelector('.example').textContent = currentWord.example || '';
+            }
+            
+            if (currentMode === 'choice') {
+                // 设置选项
+                const options = getRandomOptions(words, currentWord);
+                document.querySelectorAll('.option-btn').forEach((btn, index) => {
+                    btn.textContent = options[index].word;
+                    btn.classList.remove('correct', 'wrong');
+                });
+            } else {
+                // 设置字母提示
+                setupHintLetters();
+            }
+            
+            document.querySelector('.result').textContent = '';
+            document.querySelector('.result').className = 'result';
+            document.getElementById('answer-input').value = '';
+        }
+
+        // 设置字母提示
+        function setupHintLetters() {
+            const hintLettersContainer = document.querySelector('.hint-letters-container');
+            hintLettersContainer.innerHTML = '';
+            revealedLetters = [];
+            
+            const wordLength = currentWord.word.length;
+            const lettersToReveal = Math.ceil(wordLength / 3); // 显示1/3的字母
+            
+            // 随机选择要显示的字母位置
+            while (revealedLetters.length < lettersToReveal) {
+                const randomIndex = Math.floor(Math.random() * wordLength);
+                if (!revealedLetters.includes(randomIndex)) {
+                    revealedLetters.push(randomIndex);
+                }
+            }
+            
+            // 创建字母提示框
+            for (let i = 0; i < wordLength; i++) {
+                const letterBox = document.createElement('div');
+                letterBox.className = 'hint-letter';
+                if (revealedLetters.includes(i)) {
+                    letterBox.textContent = currentWord.word[i];
+                    letterBox.classList.add('revealed');
+                }
+                hintLettersContainer.appendChild(letterBox);
+            }
+        }
+
+        // 获取随机选项
+        function getRandomOptions(words, correctWord) {
+            const options = [correctWord];
+            while (options.length < 4) {
+                const randomWord = words[Math.floor(Math.random() * words.length)];
+                if (!options.includes(randomWord)) {
+                    options.push(randomWord);
+                }
+            }
+            return shuffleArray(options);
+        }
+
+        // 打乱数组顺序
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 提交答案（输入模式）
+        document.querySelector('.submit-btn').addEventListener('click', () => {
+            const userAnswer = document.getElementById('answer-input').value.toLowerCase();
+            checkAnswer(userAnswer);
+        });
+
+        // 选择答案（选择题模式）
+        document.querySelectorAll('.option-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const userAnswer = button.textContent;
+                checkAnswer(userAnswer);
+            });
+        });
+
+        // 检查答案
+        function checkAnswer(userAnswer) {
+            const resultDiv = document.querySelector('.result');
+            
+            if (userAnswer === currentWord.word) {
+                score += 10;
+                resultDiv.textContent = '回答正确！';
+                resultDiv.className = 'result correct';
+                document.getElementById('score').textContent = score;
+                
+                if (currentMode === 'choice') {
+                    document.querySelectorAll('.option-btn').forEach(btn => {
+                        if (btn.textContent === currentWord.word) {
+                            btn.classList.add('correct');
+                        }
+                    });
+                }
+                
+                // 显示完整例句
+                const exampleElement = document.querySelector('.example');
+                const fullExample = currentWord.example;
+                exampleElement.innerHTML = fullExample;
+                
+                setTimeout(startNewGame, 1500);
+            } else {
+                resultDiv.textContent = '回答错误，请重试！';
+                resultDiv.className = 'result wrong';
+                
+                if (currentMode === 'choice') {
+                    document.querySelectorAll('.option-btn').forEach(btn => {
+                        if (btn.textContent === userAnswer) {
+                            btn.classList.add('wrong');
+                        }
+                    });
+                }
+            }
+        }
+
+        // 按回车键提交
+        document.getElementById('answer-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.querySelector('.submit-btn').click();
+            }
+        });
+
+        // 显示答案按钮点击事件
+        document.querySelector('.show-answer-btn').addEventListener('click', () => {
+            const answerDisplay = document.querySelector('.answer-display');
+            answerDisplay.textContent = `正确答案: ${currentWord.word}`;
+            answerDisplay.style.display = 'block';
+            
+            // 3秒后自动隐藏答案
+            setTimeout(() => {
+                answerDisplay.style.display = 'none';
+            }, 3000);
+        });
+
+        // 检查浏览器兼容性
+        function checkBrowserCompatibility() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            
+            if (isIOS && !isSafari) {
+                alert('建议使用Safari浏览器以获得最佳体验');
+            }
+            
+            if (!('speechSynthesis' in window)) {
+                console.warn('当前浏览器不支持语音合成功能');
+            }
+        }
+
+        // 在页面加载完成后检查兼容性
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(checkBrowserCompatibility, 1000);
+        });
+
+        // 语音合成功能
+        function speakWord(word) {
+            if ('speechSynthesis' in window) {
+                try {
+                    // 确保停止所有正在播放的语音
+                    window.speechSynthesis.cancel();
+                    
+                    // 等待一小段时间确保清理完成
+                    setTimeout(() => {
+                        // 获取所有可用的语音
+                        const voices = window.speechSynthesis.getVoices();
+                        const englishVoice = voices.find(voice => voice.lang.includes('en'));
+                        
+                        if (!englishVoice) {
+                            useBackupSpeech(word);
+                            return;
+                        }
+
+                        // 创建新的语音实例
+                        const utterance = new SpeechSynthesisUtterance(word);
+                        
+                        // 设置语音参数
+                        utterance.voice = englishVoice;
+                        utterance.lang = 'en-US';
+                        utterance.rate = 0.8;
+                        utterance.pitch = 1.0;
+                        utterance.volume = 1.0;
+                        
+                        // 添加错误处理
+                        utterance.onerror = function(event) {
+                            console.error('语音合成错误:', event);
+                            useBackupSpeech(word);
+                        };
+                        
+                        // 添加开始事件处理
+                        utterance.onstart = function() {
+                            console.log('开始播放语音');
+                        };
+                        
+                        // 添加完成事件处理
+                        utterance.onend = function() {
+                            console.log('语音播放完成');
+                            // 确保清理语音合成器
+                            window.speechSynthesis.cancel();
+                        };
+                        
+                        // 播放语音
+                        window.speechSynthesis.speak(utterance);
+                    }, 100);
+                } catch (error) {
+                    console.error('语音合成异常:', error);
+                    useBackupSpeech(word);
+                }
+            } else {
+                useBackupSpeech(word);
+            }
+        }
+
+        // 备用语音合成方法
+        function useBackupSpeech(word) {
+            // 使用百度语音合成API
+            const audio = new Audio();
+            // 使用百度翻译的语音API
+            audio.src = `https://fanyi.baidu.com/gettts?lan=en&text=${encodeURIComponent(word)}&spd=3&source=web`;
+            
+            audio.onerror = function() {
+                console.error('备用语音播放失败');
+                // 如果百度API也失败，尝试使用本地语音文件
+                tryLocalAudio(word);
+            };
+            
+            audio.play().catch(error => {
+                console.error('播放音频失败:', error);
+                // 如果播放失败，尝试使用本地语音文件
+                tryLocalAudio(word);
+            });
+        }
+
+        // 尝试使用本地语音文件
+        function tryLocalAudio(word) {
+            // 使用本地预录制的语音文件
+            const audio = new Audio();
+            // 这里可以添加一些常用单词的本地语音文件
+            const localAudioMap = {
+                'apple': 'audio/apple.mp3',
+                'book': 'audio/book.mp3',
+                // 可以继续添加更多单词的语音文件
+            };
+            
+            if (localAudioMap[word]) {
+                audio.src = localAudioMap[word];
+                audio.play().catch(error => {
+                    console.error('播放本地音频失败:', error);
+                    alert('语音播放失败，请检查系统声音设置。');
+                });
+            } else {
+                alert('暂不支持该单词的语音播放。');
+            }
+        }
+
+        // 为发音按钮添加点击事件
+        document.querySelector('.speak-btn').addEventListener('click', function() {
+            // 确保停止所有正在播放的语音
+            window.speechSynthesis.cancel();
+            
+            const exampleElement = document.querySelector('.example');
+            let exampleText = exampleElement.textContent;
+            
+            // 如果例句中包含空白部分，替换为实际单词
+            if (exampleText.includes('_____') && currentWord) {
+                exampleText = exampleText.replace('_____', currentWord.word);
+            }
+            
+            if (exampleText && exampleText !== 'undefined') {
+                // 只播放英文部分
+                const englishPart = exampleText.split('。')[0].trim();
+                if (englishPart) {
+                    speakWord(englishPart);
+                }
+            }
+        });
+
+        // 添加触摸事件支持
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+                e.target.classList.add('active');
+            }
+        }, false);
+
+        document.addEventListener('touchend', function(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+                e.target.classList.remove('active');
+            }
+        }, false);
+
+        // 防止双击缩放
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        }, false);
+    </script>
+</body>
+</html> 
